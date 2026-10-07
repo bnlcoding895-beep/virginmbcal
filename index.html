@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17685d">
+  <meta name="description" content="คำนวณสัดส่วน Virgin และ Regrind จากน้ำหนักรวม หรือจากน้ำหนัก Virgin สำหรับ BNL Thailand Limited">
+  <title>คำนวณ Virgin + Regrind | BNL Thailand Limited</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #152f2b;
+      --muted: #5e736e;
+      --green: #17685d;
+      --green-soft: #e9f5f1;
+      --line: #dce6e1;
+      --paper: #ffffff;
+      --bg: #f2f5f2;
+      --blue: #536e99;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Noto Sans Thai", Tahoma, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    button, input, summary { touch-action: manipulation; }
+    :focus-visible { outline: 3px solid #87bdb2; outline-offset: 3px; }
+    .page { max-width: 940px; margin: 0 auto; padding: 30px 24px 24px; }
+    .brand { display: flex; align-items: center; gap: 11px; margin-bottom: 25px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 49px; height: 40px;
+      background: var(--green); border-radius: 10px; color: white;
+      font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -.4px;
+    }
+    .brand-name { font-size: 12px; font-weight: 600; letter-spacing: 1px; line-height: 1.5; }
+    .brand-sub { color: var(--muted); font-size: 11px; letter-spacing: 0; font-weight: 400; }
+    h1 { margin: 0; font-size: clamp(24px, 5.8vw, 31px); font-weight: 700; line-height: 1.4; letter-spacing: -.6px; }
+    .subtitle { margin: 7px 0 19px; color: var(--muted); font-size: 14px; }
+    .basis {
+      display: flex; align-items: flex-start; gap: 9px; margin-bottom: 22px;
+      color: var(--green); font-size: 13px; line-height: 1.7;
+    }
+    .basis svg { flex: 0 0 17px; margin-top: 3px; }
+    .calculator {
+      display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); overflow: hidden;
+      background: var(--paper); border: 1px solid var(--line); border-radius: 20px;
+      box-shadow: 0 8px 28px #152f2b06;
+    }
+    .inputs { padding: 26px; }
+    .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted); }
+    .mode-switch {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px;
+      background: #f0f4f1; border-radius: 11px; margin: 13px 0 23px;
+    }
+    .mode {
+      min-height: 44px; padding: 8px 6px; border: 0; border-radius: 8px;
+      background: transparent; color: var(--muted); font-size: 13px; font-weight: 500;
+    }
+    .mode[aria-pressed="true"] { color: var(--green); background: white; font-weight: 700; box-shadow: 0 1px 5px #152f2b10; }
+    .field { margin-top: 19px; }
+    label { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 600; }
+    .input-wrap { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 11px; background: #fff; }
+    .input-wrap:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px #17685d10; }
+    .input-wrap:has([aria-invalid="true"]) { border-color: #bb4c3a; }
+    input {
+      width: 100%; min-width: 0; padding: 11px 14px; border: 0; border-radius: 11px;
+      outline: 0; color: var(--ink); background: transparent;
+      font-size: 25px; font-weight: 600; font-variant-numeric: tabular-nums;
+    }
+    input:focus-visible { outline: 0; }
+    .unit { padding-right: 16px; color: var(--muted); font-size: 16px; }
+    .hint { margin: 6px 0 0; font-size: 11px; line-height: 1.7; color: var(--muted); }
+    .presets { display: flex; gap: 7px; margin-top: 10px; }
+    .preset {
+      flex: 1; min-height: 36px; padding: 4px; border: 1px solid var(--line);
+      border-radius: 8px; background: white; color: var(--muted); font-size: 12px;
+    }
+    .preset[aria-pressed="true"] { border-color: #a5c8bd; color: var(--green); background: var(--green-soft); font-weight: 600; }
+    .buttons { display: grid; grid-template-columns: 1fr auto; gap: 9px; margin-top: 24px; }
+    .calculate {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 46px; padding: 9px 17px; color: white; background: var(--green);
+      border: 0; border-radius: 10px; font-weight: 600; font-size: 14px;
+    }
+    .calculate:hover { background: #10564b; }
+    .reset { min-height: 46px; padding: 9px 14px; background: white; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: 13px; }
+    .results { padding: 26px; background: #fbfdfb; border-left: 1px solid var(--line); min-width: 0; }
+    .result-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 17px; }
+    h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    .status { font-size: 10px; color: var(--green); background: var(--green-soft); padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .material-visual { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); align-items: stretch; }
+    .material-card { min-width: 0; padding: 16px; border-radius: 13px; border: 1px solid #dbe5f2; background: #f0f4fa; }
+    .material-card.regrind { background: var(--green-soft); border-color: #cee4db; }
+    .material-heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+    .material-name { font-size: 18px; font-weight: 700; line-height: 1.3; }
+    .material-card.virgin .material-name { color: #345b91; }
+    .material-card.regrind .material-name { color: var(--green); }
+    .percent-badge { padding: 2px 6px; border-radius: 6px; background: #fff9; font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
+    .material-description { min-height: 23px; margin-top: 5px; font-size: 12px; color: var(--muted); }
+    .material-symbol { display: block; width: 38px; height: 38px; margin-top: 11px; color: var(--blue); }
+    .regrind .material-symbol { color: var(--green); }
+    .material-value { margin-top: 7px; font-variant-numeric: tabular-nums; line-height: 1.5; }
+    .material-number { font-size: clamp(28px, 5vw, 36px); font-weight: 700; letter-spacing: -1px; overflow-wrap: anywhere; }
+    .value-unit { margin-left: 4px; font-size: 16px; font-weight: 500; white-space: nowrap; }
+    .grams { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .mix-plus { display: grid; place-items: center; color: var(--muted); font-size: 26px; font-weight: 400; }
+    .mix-flow { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px 0; color: var(--muted); font-size: 12px; }
+    .batch-total { padding: 16px 20px 18px; border-radius: 13px; background: #eef3ef; border: 1px solid var(--line); }
+    .total-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .total-label { font-size: 17px; font-weight: 700; }
+    .total-badge { color: var(--muted); font-size: 11px; }
+    .total-value { font-size: 44px; font-weight: 700; line-height: 1.5; letter-spacing: -1.5px; color: var(--green); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .total-value .value-unit { font-size: 20px; letter-spacing: 0; }
+    .share-bar { display: flex; height: 26px; margin-top: 8px; background: #dce6e1; border-radius: 7px; overflow: hidden; }
+    .share-segment { display: flex; align-items: center; justify-content: center; min-width: 0; overflow: hidden; color: white; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .virgin-bar { background: var(--blue); }
+    .regrind-bar { background: var(--green); }
+    .mix-summary { margin-top: 10px; font-size: 12px; color: var(--muted); text-align: center; overflow-wrap: anywhere; }
+    .formula { margin-top: 19px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .formula-name { font-size: 11px; font-weight: 600; margin-bottom: 5px; }
+    .formula-text { font-size: 11px; color: var(--muted); line-height: 1.8; overflow-wrap: anywhere; }
+    .error { padding: 18px; border: 1px solid #efd7cc; border-radius: 12px; background: #fff7f2; color: #9e412e; font-size: 13px; }
+    .error strong { display: block; margin-bottom: 6px; }
+    .scope { margin: 17px 4px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .scope strong { color: var(--ink); font-weight: 600; }
+    details { border: 1px solid var(--line); border-radius: 13px; background: white; }
+    summary { padding: 14px 18px; cursor: pointer; color: var(--ink); font-size: 13px; font-weight: 600; }
+    .guide { padding: 0 18px 16px; font-size: 12px; color: var(--muted); }
+    .guide p { margin: 7px 0 10px; }
+    .guide ol { padding-left: 21px; margin: 8px 0 14px; }
+    .guide li { margin: 5px 0; }
+    .example { background: #f3f6f3; border-radius: 8px; padding: 11px 13px; color: var(--ink); }
+    .example p { margin: 3px 0; }
+    .example strong { color: var(--green); }
+    footer { text-align: center; color: var(--muted); font-size: 10px; margin-top: 19px; }
+    noscript { display: block; padding: 15px; margin-bottom: 18px; background: #fff0e6; border-radius: 10px; }
+    @media (max-width: 680px) {
+      .page { max-width: 480px; padding: 22px 16px 20px; }
+      .brand { margin-bottom: 21px; }
+      .calculator { grid-template-columns: 1fr; border-radius: 17px; }
+      .inputs, .results { padding: 20px; }
+      .results { border-left: 0; border-top: 1px solid var(--line); }
+      .mode-switch { margin-bottom: 19px; }
+      .material-card { padding: 13px; }
+      .material-number { font-size: 32px; }
+      .batch-total { padding: 14px 18px 16px; }
+      .scope { font-size: 11px; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      button { transition: background .15s ease, color .15s ease; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">BNL</div>
+        <div class="brand-name">THAILAND LIMITED<br><span class="brand-sub">Production · Material mixing</span></div>
+      </div>
+      <h1>คำนวณเม็ดพลาสติก</h1>
+      <p class="subtitle">Virgin + Regrind · เลือกน้ำหนักที่รู้ แล้วคำนวณได้เลย</p>
+      <div class="basis">
+        <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 5.5v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span><strong>% Regrind คิดจากน้ำหนักรวม</strong> ของ Virgin + Regrind</span>
+      </div>
+    </header>
+
+    <noscript>กรุณาเปิดใช้งาน JavaScript ในเบราว์เซอร์เพื่อใช้เครื่องคำนวณ</noscript>
+
+    <section class="calculator" aria-label="เครื่องคำนวณสัดส่วนเม็ดพลาสติก">
+      <form class="inputs" id="mix-form" novalidate>
+        <div class="eyebrow">01 / กรอกข้อมูล</div>
+        <div class="mode-switch" role="group" aria-label="เลือกวิธีคำนวณ">
+          <button class="mode" id="mode-total" type="button" data-mode="total" aria-pressed="true">รู้น้ำหนักรวม</button>
+          <button class="mode" id="mode-virgin" type="button" data-mode="virgin" aria-pressed="false">รู้ Virgin</button>
+        </div>
+        <div class="field">
+          <label id="weight-label" for="weight">น้ำหนักรวม (Virgin + Regrind)</label>
+          <div class="input-wrap">
+            <input id="weight" name="weight" type="number" inputmode="decimal" min="0" step="any" value="25" required aria-describedby="weight-hint" autocomplete="off">
+            <span class="unit" aria-hidden="true">kg</span>
+          </div>
+          <p class="hint" id="weight-hint">น้ำหนักส่วนผสมที่ต้องการ โดยยังไม่รวม Masterbatch</p>
+        </div>
+        <div class="field">
+          <label for="percentage">สัดส่วน Regrind (เม็ดบด)</label>
+          <div class="input-wrap">
+            <input id="percentage" name="percentage" type="number" inputmode="decimal" min="0" max="100" step="any" value="60" required aria-describedby="percentage-hint" autocomplete="off">
+            <span class="unit" aria-hidden="true">%</span>
+          </div>
+          <p class="hint" id="percentage-hint">เช่น Regrind 60% → Virgin 40% ของน้ำหนักรวม</p>
+          <div class="presets" role="group" aria-label="เลือกเปอร์เซ็นต์ Regrind ที่ใช้บ่อย">
+            <button class="preset" type="button" data-percent="20" aria-pressed="false" aria-label="Regrind 20 เปอร์เซ็นต์">20%</button>
+            <button class="preset" type="button" data-percent="40" aria-pressed="false" aria-label="Regrind 40 เปอร์เซ็นต์">40%</button>
+            <button class="preset" type="button" data-percent="60" aria-pressed="true" aria-label="Regrind 60 เปอร์เซ็นต์">60%</button>
+            <button class="preset" type="button" data-percent="80" aria-pressed="false" aria-label="Regrind 80 เปอร์เซ็นต์">80%</button>
+          </div>
+        </div>
+        <div class="buttons">
+          <button type="submit" class="calculate">
+            คำนวณ
+            <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button type="button" id="reset" class="reset">เริ่มใหม่</button>
+        </div>
+      </form>
+
+      <section class="results" aria-label="ผลคำนวณ" aria-live="polite" aria-atomic="true">
+        <div class="result-title">
+          <h2>02 / น้ำหนักที่ต้องชั่ง</h2>
+          <span class="status" id="status">อัปเดตอัตโนมัติ</span>
+        </div>
+        <div class="error" id="error" hidden role="alert">
+          <strong>ตรวจสอบข้อมูลอีกครั้ง</strong>
+          <span id="error-text"></span>
+        </div>
+        <div id="valid-results" hidden>
+          <div class="material-visual">
+            <section class="material-card virgin" aria-label="น้ำหนัก Virgin เม็ดใหม่">
+              <div class="material-heading">
+                <span class="material-name">Virgin</span>
+                <span class="percent-badge"><span id="virgin-percent"></span>%</span>
+              </div>
+              <div class="material-description">เม็ดใหม่</div>
+              <svg class="material-symbol" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 5h16l-2 7c6 5 9 10 9 17 0 4-3 6-7 6H12c-4 0-7-2-7-6 0-7 3-12 9-17l-2-7Z" stroke="currentColor" stroke-width="1.6"/><path d="M14 12h12" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="24" r="2.3" fill="currentColor"/><circle cx="23" cy="21" r="2.3" fill="currentColor"/><circle cx="25" cy="29" r="2.3" fill="currentColor"/><circle cx="16" cy="31" r="2.3" fill="currentColor"/></svg>
+              <div class="material-value"><output class="material-number" id="virgin-result" for="weight percentage"></output><span class="value-unit">kg</span></div>
+              <div class="grams" id="virgin-grams"></div>
+            </section>
+            <div class="mix-plus" aria-hidden="true">+</div>
+            <section class="material-card regrind" aria-label="น้ำหนัก Regrind เม็ดบด">
+              <div class="material-heading">
+                <span class="material-name">Regrind</span>
+                <span class="percent-badge"><span id="regrind-percent"></span>%</span>
+              </div>
+              <div class="material-description" id="regrind-label">เม็ดบดที่ต้องใช้</div>
+              <svg class="material-symbol" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 5h16l-2 7c6 5 9 10 9 17 0 4-3 6-7 6H12c-4 0-7-2-7-6 0-7 3-12 9-17l-2-7Z" stroke="currentColor" stroke-width="1.6"/><path d="M14 12h12" stroke="currentColor" stroke-width="1.6"/><path d="m12 23 5-3 3 5-4 2-4-4Zm12-4 4 3-2 4-4-2 2-5Zm-6 10 5-1 3 4-8 1v-4Z" fill="currentColor"/></svg>
+              <div class="material-value"><output class="material-number" id="regrind-result" for="weight percentage"></output><span class="value-unit">kg</span></div>
+              <div class="grams" id="regrind-grams"></div>
+            </section>
+          </div>
+          <div class="mix-flow" aria-hidden="true">
+            <svg width="20" height="22" viewBox="0 0 20 22" fill="none"><path d="M10 2v17m-6-6 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            ผสมรวมกัน
+          </div>
+          <div class="batch-total">
+            <div class="total-heading"><span class="total-label">น้ำหนักรวม</span><span class="total-badge">Virgin + Regrind</span></div>
+            <div class="total-value"><output id="total-result" for="weight percentage"></output><span class="value-unit">kg</span></div>
+            <div class="share-bar" role="img" id="share-bar">
+              <div class="share-segment virgin-bar" id="virgin-bar"><span id="bar-virgin-percent"></span></div>
+              <div class="share-segment regrind-bar" id="regrind-bar"><span id="bar-regrind-percent"></span></div>
+            </div>
+            <div class="mix-summary" id="mix-summary"></div>
+          </div>
+          <div class="formula">
+            <div class="formula-name">สูตรที่ใช้</div>
+            <div class="formula-text" id="formula"></div>
+            <div class="formula-text" id="substitution"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <p class="scope"><strong>คำนวณเฉพาะ Virgin + Regrind ยังไม่รวม Masterbatch</strong><br>น้ำหนักปัดเศษสูงสุด 3 ตำแหน่ง (0.001 kg = 1 g) · เลือก % ตามสูตรที่อนุมัติของงานนั้น</p>
+
+    <details>
+      <summary>วิธีใช้งานและตัวอย่างการคำนวณ</summary>
+      <div class="guide">
+        <ol>
+          <li>เลือก <strong>“รู้น้ำหนักรวม”</strong> เมื่อต้องการผสมให้ได้น้ำหนักรวมตามที่กำหนด</li>
+          <li>เลือก <strong>“รู้ Virgin”</strong> เมื่อมีเม็ดใหม่อยู่แล้ว หรือต้องการกำหนดน้ำหนักเม็ดใหม่</li>
+          <li>กรอกน้ำหนักเป็น kg และกรอก % Regrind ของส่วนผสมรวม ผลจะเปลี่ยนตามข้อมูลทันที</li>
+          <li>ชั่ง Virgin และ Regrind ตามผลคำนวณ แล้วผสมตามขั้นตอนของโรงงาน</li>
+        </ol>
+        <div class="example">
+          <p><strong>ตัวอย่าง Regrind 60%</strong></p>
+          <p>รู้ยอดรวม 25 kg → Virgin 10 kg + Regrind 15 kg</p>
+          <p>รู้ Virgin 10 kg → Regrind 15 kg → รวม 25 kg</p>
+        </div>
+        <p>สัดส่วน Regrind = น้ำหนัก Regrind ÷ (Virgin + Regrind) × 100</p>
+        <p>ในโหมดรู้ Virgin ให้กรอกน้ำหนักมากกว่า 0 และ Regrind ตั้งแต่ 0% แต่น้อยกว่า 100% ส่วนโหมดน้ำหนักรวมใช้ Regrind 100% ได้ (Virgin = 0 kg)</p>
+      </div>
+    </details>
+    <footer>BNL Thailand Limited · Virgin + Regrind Calculator</footer>
+  </main>
+
+  <script>
+    'use strict';
+
+    // Percentage is based on Virgin + Regrind; masterbatch is excluded.
+    // No libraries, server or build step are required.
+    const el = (id) => document.getElementById(id);
+    const weightInput = el('weight');
+    const percentInput = el('percentage');
+    const modes = Array.from(document.querySelectorAll('[data-mode]'));
+    const presets = Array.from(document.querySelectorAll('[data-percent]'));
+    const kgFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+    const gramFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const simpleFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 12, useGrouping: false });
+    let mode = 'total';
+
+    function readNumber(input) {
+      return input.value.trim() === '' ? NaN : input.valueAsNumber;
+    }
+
+    function calculateMix(weight, percentage, selectedMode) {
+      const regrindFraction = percentage / 100;
+      if (selectedMode === 'total') {
+        const regrind = weight * regrindFraction;
+        return { virgin: weight - regrind, regrind, total: weight };
+      }
+      const virginFraction = (100 - percentage) / 100;
+      const total = weight / virginFraction;
+      return { virgin: weight, regrind: total - weight, total };
+    }
+
+    function showError(message, input) {
+      el('valid-results').hidden = true;
+      // Clear previous results so invalid data cannot leave usable stale weights.
+      ['virgin-result', 'regrind-result', 'total-result', 'virgin-grams', 'regrind-grams', 'bar-virgin-percent', 'bar-regrind-percent', 'mix-summary', 'formula', 'substitution'].forEach((id) => { el(id).textContent = ''; });
+      el('error-text').textContent = message;
+      el('error').hidden = false;
+      el('status').hidden = true;
+      if (input) input.setAttribute('aria-invalid', 'true');
+      return false;
+    }
+
+    function render() {
+      const weight = readNumber(weightInput);
+      const percentage = readNumber(percentInput);
+      weightInput.removeAttribute('aria-invalid');
+      percentInput.removeAttribute('aria-invalid');
+      presets.forEach((button) => { button.setAttribute('aria-pressed', String(Number(button.dataset.percent) === percentage)); });
+
+      if (!Number.isFinite(percentage) || percentage < 0 || percentage > 100) {
+        return showError('กรุณากรอกสัดส่วน Regrind ตั้งแต่ 0 ถึง 100%', percentInput);
+      }
+      if (mode === 'virgin' && percentage === 100) {
+        return showError('Regrind 100% หมายถึงไม่มี Virgin จึงคำนวณจากน้ำหนัก Virgin ไม่ได้ หากต้องการใช้ Regrind ล้วน ให้เลือก “รู้น้ำหนักรวม”', percentInput);
+      }
+      if (!Number.isFinite(weight) || weight <= 0) {
+        return showError('กรุณากรอกน้ำหนักเป็นตัวเลขมากกว่า 0 kg', weightInput);
+      }
+
+      const result = calculateMix(weight, percentage, mode);
+      if (![result.virgin, result.regrind, result.total, result.virgin * 1000, result.regrind * 1000].every(Number.isFinite)) {
+        return showError('น้ำหนักสูงเกินช่วงที่คำนวณได้ กรุณาลดน้ำหนักหรือสัดส่วน Regrind');
+      }
+
+      el('error').hidden = true;
+      el('status').hidden = false;
+      el('valid-results').hidden = false;
+      el('regrind-label').textContent = mode === 'virgin' ? 'เม็ดบดที่ต้องเติม' : 'เม็ดบดที่ต้องใช้';
+      el('virgin-result').textContent = kgFormatter.format(result.virgin);
+      el('regrind-result').textContent = kgFormatter.format(result.regrind);
+      el('total-result').textContent = kgFormatter.format(result.total);
+      el('virgin-grams').textContent = '= ' + gramFormatter.format(result.virgin * 1000) + ' g';
+      el('regrind-grams').textContent = '= ' + gramFormatter.format(result.regrind * 1000) + ' g';
+
+      const virginPercent = 100 - percentage;
+      el('virgin-percent').textContent = simpleFormatter.format(virginPercent);
+      el('regrind-percent').textContent = simpleFormatter.format(percentage);
+      el('percentage-hint').textContent = 'Regrind ' + simpleFormatter.format(percentage) + '% → Virgin ' + simpleFormatter.format(virginPercent) + '% ของน้ำหนักรวม';
+      el('virgin-bar').style.width = virginPercent + '%';
+      el('regrind-bar').style.width = percentage + '%';
+      el('bar-virgin-percent').textContent = simpleFormatter.format(virginPercent) + '%';
+      el('bar-regrind-percent').textContent = simpleFormatter.format(percentage) + '%';
+      // Keep small chart segments proportional without squeezing labels into them.
+      el('bar-virgin-percent').hidden = virginPercent < 20;
+      el('bar-regrind-percent').hidden = percentage < 20;
+      el('share-bar').setAttribute('aria-label', 'Virgin ' + kgFormatter.format(result.virgin) + ' kg (' + simpleFormatter.format(virginPercent) + '%) + Regrind ' + kgFormatter.format(result.regrind) + ' kg (' + simpleFormatter.format(percentage) + '%) = น้ำหนักรวม ' + kgFormatter.format(result.total) + ' kg');
+      el('mix-summary').textContent = kgFormatter.format(result.virgin) + ' kg + ' + kgFormatter.format(result.regrind) + ' kg = ' + kgFormatter.format(result.total) + ' kg';
+
+      if (mode === 'virgin') {
+        el('formula').textContent = 'Regrind = Virgin × [% Regrind ÷ (100 − % Regrind)]';
+        el('substitution').textContent = simpleFormatter.format(weight) + ' × [' + simpleFormatter.format(percentage) + ' ÷ ' + simpleFormatter.format(virginPercent) + '] = ' + kgFormatter.format(result.regrind) + ' kg';
+      } else {
+        el('formula').textContent = 'Regrind = น้ำหนักรวม × % Regrind ÷ 100';
+        el('substitution').textContent = simpleFormatter.format(weight) + ' × ' + simpleFormatter.format(percentage) + ' ÷ 100 = ' + kgFormatter.format(result.regrind) + ' kg · Virgin = รวม − Regrind';
+      }
+      return true;
+    }
+
+    function setMode(nextMode, preserveTotal = true) {
+      if (nextMode === mode) return;
+      const weight = readNumber(weightInput);
+      const percentage = readNumber(percentInput);
+      // Keep the same batch when switching modes with valid data.
+      if (preserveTotal && Number.isFinite(weight) && weight > 0 && Number.isFinite(percentage) && percentage >= 0 && percentage <= 100 && !(mode === 'virgin' && percentage === 100)) {
+        const result = calculateMix(weight, percentage, mode);
+        const nextWeight = nextMode === 'total' ? result.total : result.virgin;
+        if (Number.isFinite(nextWeight)) weightInput.value = String(nextWeight);
+      }
+      mode = nextMode;
+      modes.forEach((button) => { button.setAttribute('aria-pressed', String(button.dataset.mode === mode)); });
+      el('weight-label').textContent = mode === 'virgin' ? 'น้ำหนัก Virgin (เม็ดใหม่)' : 'น้ำหนักรวม (Virgin + Regrind)';
+      el('weight-hint').textContent = mode === 'virgin' ? 'น้ำหนักเม็ดใหม่ที่มีอยู่ ก่อนเติม Regrind' : 'น้ำหนักส่วนผสมที่ต้องการ โดยยังไม่รวม Masterbatch';
+      render();
+    }
+
+    modes.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
+    presets.forEach((button) => button.addEventListener('click', () => {
+      percentInput.value = button.dataset.percent;
+      render();
+    }));
+    [weightInput, percentInput].forEach((input) => input.addEventListener('input', render));
+    el('mix-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!render()) {
+        const invalid = document.querySelector('[aria-invalid="true"]');
+        if (invalid) invalid.focus();
+      }
+    });
+    el('reset').addEventListener('click', () => {
+      setMode('total', false);
+      weightInput.value = '25';
+      percentInput.value = '60';
+      render();
+      weightInput.focus();
+    });
+    render();
+  </script>
+</body>
+</html>
